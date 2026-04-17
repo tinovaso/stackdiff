@@ -1,63 +1,41 @@
-import { FlatDependencies } from './packageParser';
-
-export type DiffStatus = 'added' | 'removed' | 'upgraded' | 'downgraded' | 'unchanged';
-
-export interface DependencyDiff {
-  name: string;
-  status: DiffStatus;
-  versionA?: string;
-  versionB?: string;
-}
+export type DiffType = 'added' | 'removed' | 'changed';
 
 export interface DiffResult {
-  added: DependencyDiff[];
-  removed: DependencyDiff[];
-  upgraded: DependencyDiff[];
-  downgraded: DependencyDiff[];
-  unchanged: DependencyDiff[];
+  name: string;
+  type: DiffType;
+  versionA: string | undefined;
+  versionB: string | undefined;
+}
+
+export function compareVersions(a: string, b: string): number {
+  const pa = a.replace(/^[^\d]*/, '').split('.').map(Number);
+  const pb = b.replace(/^[^\d]*/, '').split('.').map(Number);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const diff = (pa[i] || 0) - (pb[i] || 0);
+    if (diff !== 0) return diff;
+  }
+  return 0;
 }
 
 export function diffDependencies(
-  depsA: FlatDependencies,
-  depsB: FlatDependencies
-): DiffResult {
-  const result: DiffResult = {
-    added: [],
-    removed: [],
-    upgraded: [],
-    downgraded: [],
-    unchanged: [],
-  };
-
+  depsA: Record<string, string>,
+  depsB: Record<string, string>
+): DiffResult[] {
+  const results: DiffResult[] = [];
   const allKeys = new Set([...Object.keys(depsA), ...Object.keys(depsB)]);
 
   for (const name of allKeys) {
-    const versionA = depsA[name];
-    const versionB = depsB[name];
+    const vA = depsA[name];
+    const vB = depsB[name];
 
-    if (!versionA) {
-      result.added.push({ name, status: 'added', versionB });
-    } else if (!versionB) {
-      result.removed.push({ name, status: 'removed', versionA });
-    } else if (versionA === versionB) {
-      result.unchanged.push({ name, status: 'unchanged', versionA, versionB });
-    } else {
-      const status = compareVersions(versionA, versionB);
-      result[status].push({ name, status, versionA, versionB });
+    if (!vA && vB) {
+      results.push({ name, type: 'added', versionA: undefined, versionB: vB });
+    } else if (vA && !vB) {
+      results.push({ name, type: 'removed', versionA: vA, versionB: undefined });
+    } else if (vA && vB && vA !== vB) {
+      results.push({ name, type: 'changed', versionA: vA, versionB: vB });
     }
   }
 
-  return result;
-}
-
-function compareVersions(vA: string, vB: string): 'upgraded' | 'downgraded' {
-  const parse = (v: string) => v.replace(/^[^\d]*/, '').split('.').map(Number);
-  const a = parse(vA);
-  const b = parse(vB);
-  for (let i = 0; i < Math.max(a.length, b.length); i++) {
-    const diff = (b[i] ?? 0) - (a[i] ?? 0);
-    if (diff > 0) return 'upgraded';
-    if (diff < 0) return 'downgraded';
-  }
-  return 'upgraded';
+  return results.sort((a, b) => a.name.localeCompare(b.name));
 }
