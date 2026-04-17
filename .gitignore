@@ -1,0 +1,9 @@
+node_modules/
+Thumbs.db
+.env
+build/
+.env.local
+*.tsbuildinfo
+*.js.map
+*.log
+coverage/
