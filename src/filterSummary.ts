@@ -34,3 +34,10 @@ export function formatSummary(summary: FilterSummary): string {
   ];
   return parts.join('  |  ');
 }
+
+/**
+ * Returns true if the summary contains any differences (added, removed, or changed entries).
+ */
+export function hasDifferences(summary: FilterSummary): boolean {
+  return summary.added > 0 || summary.removed > 0 || summary.changed > 0;
+}
