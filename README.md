@@ -29,6 +29,7 @@ This will output a visual diff of the dependency trees, highlighting added, remo
 | `--depth <n>` | Limit tree depth (default: unlimited) |
 | `--json` | Output results as JSON |
 | `--no-color` | Disable colored output |
+| `--ignore <pkg>` | Ignore a package by name (repeatable) |
 
 **Example output:**
 
@@ -36,6 +37,16 @@ This will output a visual diff of the dependency trees, highlighting added, remo
 + added:   scheduler@0.23.0
 ~ changed: loose-envify 1.4.0 → 1.5.0
 - removed: object-assign@4.1.1
+```
+
+**JSON output example (`--json`):**
+
+```json
+{
+  "added": ["scheduler@0.23.0"],
+  "changed": [{ "name": "loose-envify", "from": "1.4.0", "to": "1.5.0" }],
+  "removed": ["object-assign@4.1.1"]
+}
 ```
 
 ## Requirements
