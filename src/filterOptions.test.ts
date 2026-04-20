@@ -27,6 +27,16 @@ describe('parseFilterOptions', () => {
     expect(result.exclude).toEqual(['jest', 'webpack']);
   });
 
+  it('parses single-item include list', () => {
+    const result = parseFilterOptions({ include: 'react' });
+    expect(result.include).toEqual(['react']);
+  });
+
+  it('trims whitespace from exclude list entries', () => {
+    const result = parseFilterOptions({ exclude: ' jest , webpack ' });
+    expect(result.exclude).toEqual(['jest', 'webpack']);
+  });
+
   it('throws when devOnly and prodOnly are both set', () => {
     expect(() =>
       parseFilterOptions({ devOnly: true, prodOnly: true })
