@@ -18,6 +18,10 @@ export function filterDiff(
   entries: DiffEntry[],
   options: FilterOptions
 ): DiffEntry[] {
+  if (options.devOnly && options.prodOnly) {
+    throw new Error('Cannot use both devOnly and prodOnly options simultaneously');
+  }
+
   let result = [...entries];
 
   if (options.onlyChanged) {
